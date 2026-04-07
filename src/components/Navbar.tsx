@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Shield, LayoutDashboard, Upload, BookOpen } from "lucide-react";
+import { Shield, LayoutDashboard, ClipboardPaste, BookOpen } from "lucide-react";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/upload", label: "Upload", icon: Upload },
+  { href: "/upload", label: "Paste", icon: ClipboardPaste },
   { href: "/baseline", label: "Baseline", icon: BookOpen },
 ];
 
