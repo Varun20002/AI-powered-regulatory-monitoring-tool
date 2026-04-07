@@ -10,7 +10,7 @@ An intelligent compliance monitoring system built for Glomopay, an IFSC-licensed
 │  ├── Dashboard (feed with filters, Monday morning view)   │
 │  ├── Analysis Card (summary + score + actions + citations)│
 │  ├── Baseline Editor (view/edit regulatory reality)       │
-│  ├── PDF Upload (custom document ingestion)               │
+│  ├── Paste (submit circular text for analysis)              │
 │  └── API Routes (CRUD, analysis trigger, review, fetch)   │
 └─────────────────────────┬────────────────────────────────┘
                           │
@@ -40,7 +40,7 @@ An intelligent compliance monitoring system built for Glomopay, an IFSC-licensed
 ## Features
 
 - **Auto-fetch** from 3 regulatory sources (RBI, SEBI, IFSCA)
-- **Custom PDF upload** with drag-and-drop
+- **Paste circular text** for ad-hoc analysis (no file upload)
 - **AI analysis** with 5-step chain-of-thought reasoning
 - **Semantic relevance scoring** (LLM extraction + deterministic scoring)
 - **Glomopay baseline** — structured regulatory reality for accurate delta detection
@@ -113,12 +113,12 @@ src/
 │   ├── page.tsx                    # Dashboard
 │   ├── circular/[id]/page.tsx      # Analysis card detail
 │   ├── baseline/page.tsx           # Baseline viewer/editor
-│   ├── upload/page.tsx             # PDF upload
+│   ├── upload/page.tsx             # Paste circular text
 │   └── api/
 │       ├── circulars/route.ts      # GET (list+filter)
 │       ├── circulars/[id]/route.ts # GET single circular
 │       ├── analyze/route.ts        # POST: trigger LLM analysis
-│       ├── upload/route.ts         # POST: PDF upload
+│       ├── upload/route.ts         # POST: pasted text → analyze
 │       ├── baseline/route.ts       # GET, PUT
 │       ├── baseline/seed/route.ts  # POST: seed baseline
 │       ├── review/route.ts         # POST: mark reviewed
@@ -159,18 +159,47 @@ src/
 5. **Display**: Dashboard shows circulars sorted by relevance with analysis cards
 6. **Review**: Compliance officer reviews, confirms baseline changes, adds notes
 
-## Deployment
+## Deployment (Vercel)
 
-### Vercel
+### 1. Supabase
 
-1. Push to GitHub
-2. Import in Vercel
-3. Set environment variables in Vercel dashboard
-4. Deploy
+- Run `supabase/schema.sql` in the Supabase SQL Editor.
+- Create a storage bucket named `circular-pdfs` (public or signed URLs per your policy) if you use PDF ingestion from scrapers.
 
-The `vercel.json` configures:
-- 60-second function timeout for LLM analysis
-- Daily cron job at 6 AM UTC to fetch new circulars
+### 2. Import the repo in Vercel
+
+Connect the GitHub repo and use the default Next.js framework preset.
+
+### 3. Environment variables
+
+In **Vercel → Project → Settings → Environment Variables**, add (Production + Preview as needed):
+
+| Name | Notes |
+|------|--------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon (public) key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key — **server only** |
+| `MINIMAX_API_KEY` | Your MiniMax API key |
+| `CRON_SECRET` | Long random string. Protects `POST /api/fetch` from anonymous abuse. |
+
+`MINIMAX_API_KEY` is read only on the server (`callMiniMax`); it is never prefixed with `NEXT_PUBLIC_`.
+
+### 4. Cron job
+
+`vercel.json` schedules **GET `/api/fetch` daily at 06:00 UTC**. Vercel sends the header `x-vercel-cron: 1` on that request. If you set `CRON_SECRET`, Vercel also sends `Authorization: Bearer <CRON_SECRET>` for cron invocations when configured in the dashboard.
+
+- **Fetch Now** on the dashboard runs a **server action** (`triggerRegulatoryFetch`) and does not expose `CRON_SECRET` to the browser.
+- **Manual POST** to `/api/fetch` requires `CRON_SECRET` as query `?secret=` or header `x-cron-secret` when that env var is set.
+
+### 5. Function duration
+
+`vercel.json` sets **60s** `maxDuration` for `/api/analyze`, `/api/fetch`, and `/api/upload`. On the **Hobby** plan, serverless timeouts are shorter; use **Pro** (or equivalent) if analyses or full scrapes hit time limits.
+
+### 6. Deploy
+
+Push to `main` (or merge a PR). Vercel builds with `npm run build`.
+
+After deploy, open the production URL, seed the baseline (`POST /api/baseline/seed` or the Baseline page), then use **Fetch Now** or wait for the cron run.
 
 ## Design Decisions
 

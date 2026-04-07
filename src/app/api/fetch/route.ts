@@ -1,30 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase/server";
-import { scrapeRBI } from "@/lib/scrapers/rbi";
-import { scrapeSEBI } from "@/lib/scrapers/sebi";
-import { scrapeIFSCA } from "@/lib/scrapers/ifsca";
-import { extractTextFromPdfUrl } from "@/lib/scrapers/pdf-extractor";
-import { extractTextFromUrl } from "@/lib/scrapers/html-extractor";
-import type { ScrapedCircular, Source } from "@/lib/types";
+import { runRegulatoryFetch } from "@/lib/regulatory-fetch";
 
 export const maxDuration = 60;
 
-async function runScraper(
-  name: Source,
-  fn: () => Promise<ScrapedCircular[]>
-): Promise<{ source: Source; items: ScrapedCircular[]; error?: string }> {
-  try {
-    const items = await fn();
-    return { source: name, items };
-  } catch (error) {
-    return {
-      source: name,
-      items: [],
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
+function resolveAnalyzeBaseUrl(request: NextRequest): string {
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  if (forwardedHost) {
+    const proto = forwardedProto || "https";
+    return `${proto}://${forwardedHost}`;
   }
+  const host = request.headers.get("host");
+  if (host) {
+    const proto = forwardedProto || (host.startsWith("localhost") ? "http" : "https");
+    return `${proto}://${host}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return new URL(request.url).origin;
 }
 
+/**
+ * Vercel Cron sends GET with `x-vercel-cron: 1`.
+ * If CRON_SECRET is set, Vercel also sends `Authorization: Bearer <CRON_SECRET>`.
+ * Manual GET (curl) can use the same Bearer token.
+ */
+function isCronGetAuthorized(request: NextRequest): boolean {
+  if (request.headers.get("x-vercel-cron") === "1") return true;
+  const secret = process.env.CRON_SECRET;
+  if (secret) {
+    const auth = request.headers.get("authorization");
+    if (auth === `Bearer ${secret}`) return true;
+    if (request.headers.get("x-cron-secret") === secret) return true;
+  }
+  return false;
+}
+
+/** Vercel Cron invokes this path with GET (see vercel.json `crons`) */
+export async function GET(request: NextRequest) {
+  if (!isCronGetAuthorized(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const base = resolveAnalyzeBaseUrl(request);
+  const summary = await runRegulatoryFetch(base);
+  return NextResponse.json({ summary });
+}
+
+/**
+ * Manual trigger: requires CRON_SECRET via ?secret= or x-cron-secret when CRON_SECRET is set.
+ * Prefer the dashboard "Fetch Now" button (server action) so the secret never hits the browser.
+ */
 export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const secret = searchParams.get("secret");
@@ -38,107 +64,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = createServerClient();
-
-  const results = await Promise.allSettled([
-    runScraper("RBI", scrapeRBI),
-    runScraper("SEBI", scrapeSEBI),
-    runScraper("IFSCA", scrapeIFSCA),
-  ]);
-
-  const summary: Record<string, { found: number; processed: number; error?: string }> = {};
-
-  for (const result of results) {
-    if (result.status === "rejected") continue;
-
-    const { source, items, error } = result.value;
-    let processed = 0;
-
-    for (const item of items) {
-      const { data: existing } = await supabase
-        .from("circulars")
-        .select("id")
-        .eq("guid", item.guid)
-        .limit(1);
-
-      if (existing && existing.length > 0) continue;
-
-      let fullText: string | null = null;
-      let pdfStoragePath: string | null = null;
-
-      if (item.pdfUrl) {
-        try {
-          fullText = await extractTextFromPdfUrl(item.pdfUrl);
-
-          const pdfResponse = await fetch(item.pdfUrl);
-          const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
-          const fileName = `${source}/${Date.now()}-${item.guid.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 50)}.pdf`;
-
-          const { error: uploadError } = await supabase.storage
-            .from("circular-pdfs")
-            .upload(fileName, pdfBuffer, {
-              contentType: "application/pdf",
-            });
-
-          if (!uploadError) {
-            pdfStoragePath = fileName;
-          }
-        } catch (e) {
-          console.error(`PDF extraction failed for ${item.url}:`, e);
-        }
-      }
-
-      if (!fullText && item.url) {
-        try {
-          fullText = await extractTextFromUrl(item.url);
-        } catch (e) {
-          console.error(`HTML extraction failed for ${item.url}:`, e);
-        }
-      }
-
-      const { data: inserted, error: insertError } = await supabase
-        .from("circulars")
-        .insert({
-          source: item.source,
-          title: item.title,
-          published_date: item.publishedDate,
-          url: item.url,
-          pdf_storage_path: pdfStoragePath,
-          full_text: fullText,
-          guid: item.guid,
-        })
-        .select()
-        .single();
-
-      if (!insertError && inserted && fullText) {
-        try {
-          await fetch(new URL("/api/analyze", request.url).toString(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ circular_id: inserted.id }),
-          });
-        } catch (e) {
-          console.error(`Analysis trigger failed for ${inserted.id}:`, e);
-        }
-      }
-
-      if (!insertError) processed++;
-    }
-
-    summary[source] = {
-      found: items.length,
-      processed,
-      error,
-    };
-
-    await supabase.from("scraper_logs").insert({
-      source,
-      status: error ? "FAILED" : processed > 0 ? "SUCCESS" : "PARTIAL",
-      items_found: items.length,
-      items_processed: processed,
-      error_message: error || null,
-    });
-  }
-
+  const base = resolveAnalyzeBaseUrl(request);
+  const summary = await runRegulatoryFetch(base);
   return NextResponse.json({ summary });
 }

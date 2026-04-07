@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { triggerRegulatoryFetch } from "@/app/actions/fetch-regulatory";
 
 export function FetchButton({ onComplete }: { onComplete?: () => void }) {
   const [loading, setLoading] = useState(false);
@@ -13,18 +14,16 @@ export function FetchButton({ onComplete }: { onComplete?: () => void }) {
     setResult(null);
 
     try {
-      const res = await fetch("/api/fetch", { method: "POST" });
-      const data = await res.json();
+      const data = await triggerRegulatoryFetch();
 
-      if (data.summary) {
+      if (data.ok && data.summary) {
         const total = Object.values(data.summary).reduce(
-          (sum: number, s: unknown) => {
-            const source = s as { processed: number };
-            return sum + (source.processed || 0);
-          },
+          (sum, s) => sum + (s.processed || 0),
           0
         );
         setResult(`Fetched ${total} new circular(s)`);
+      } else {
+        setResult(data.error || "Fetch failed");
       }
 
       onComplete?.();

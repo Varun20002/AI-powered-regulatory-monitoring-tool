@@ -1,15 +1,25 @@
 import OpenAI from "openai";
 
-const minimax = new OpenAI({
-  apiKey: process.env.MINIMAX_API_KEY,
-  baseURL: "https://api.minimax.io/v1",
-});
+function getMiniMaxClient(): OpenAI {
+  const key = process.env.MINIMAX_API_KEY;
+  if (!key) {
+    throw new Error(
+      "MINIMAX_API_KEY is not set. Add it in Vercel Project Settings → Environment Variables."
+    );
+  }
+  return new OpenAI({
+    apiKey: key,
+    baseURL: "https://api.minimax.io/v1",
+  });
+}
 
 export async function callMiniMax(
   systemPrompt: string,
   userPrompt: string,
   maxRetries = 3
 ): Promise<string> {
+  const minimax = getMiniMaxClient();
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const response = await minimax.chat.completions.create({
