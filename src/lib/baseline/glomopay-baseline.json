@@ -1,0 +1,234 @@
+[
+  {
+    "domain": "Products",
+    "category": "Outward Remittance (LRS)",
+    "rule_name": "LRS Transaction Limit",
+    "current_value": "$250,000 per person per financial year",
+    "governed_by": "RBI",
+    "source_circular": "RBI Master Direction on LRS (updated annually)"
+  },
+  {
+    "domain": "Products",
+    "category": "Outward Remittance (LRS)",
+    "rule_name": "LRS Purpose Codes",
+    "current_value": "Private visit, gift/donation, education, medical, employment, emigration, maintenance of close relatives, travel, liberalised remittance",
+    "governed_by": "RBI",
+    "source_circular": "RBI Master Direction on LRS"
+  },
+  {
+    "domain": "Products",
+    "category": "Outward Remittance (LRS)",
+    "rule_name": "TCS on LRS Remittances",
+    "current_value": "5% above INR 7 lakh (20% for non-education/medical purposes above INR 7 lakh)",
+    "governed_by": "RBI/CBDT",
+    "source_circular": "Finance Act 2023 amendments"
+  },
+  {
+    "domain": "Products",
+    "category": "Outward Remittance (LRS)",
+    "rule_name": "Form A2 Requirement",
+    "current_value": "Mandatory for all LRS transactions",
+    "governed_by": "RBI",
+    "source_circular": "RBI Master Direction on LRS"
+  },
+  {
+    "domain": "Products",
+    "category": "Payment Aggregator/Gateway",
+    "rule_name": "PA/PG Settlement Timeline",
+    "current_value": "T+1 business day settlement to merchants",
+    "governed_by": "RBI",
+    "source_circular": "RBI Guidelines on PA/PG (March 2020, updated)"
+  },
+  {
+    "domain": "Products",
+    "category": "Payment Aggregator/Gateway",
+    "rule_name": "PA Net Worth Requirement",
+    "current_value": "INR 25 crore by March 2025",
+    "governed_by": "RBI",
+    "source_circular": "RBI PA/PG Guidelines"
+  },
+  {
+    "domain": "Products",
+    "category": "Payment Aggregator/Gateway",
+    "rule_name": "Escrow Account Requirement",
+    "current_value": "Mandatory escrow account with scheduled commercial bank",
+    "governed_by": "RBI",
+    "source_circular": "RBI PA/PG Guidelines"
+  },
+  {
+    "domain": "Products",
+    "category": "KYC/Identity",
+    "rule_name": "KYC Requirements for Remittance",
+    "current_value": "Full KYC mandatory: PAN, Aadhaar, address proof. Video KYC allowed for digital onboarding.",
+    "governed_by": "RBI",
+    "source_circular": "RBI Master Direction on KYC (2016, updated)"
+  },
+  {
+    "domain": "Products",
+    "category": "KYC/Identity",
+    "rule_name": "Periodic KYC Update",
+    "current_value": "High risk: every 2 years, Medium risk: every 8 years, Low risk: every 10 years",
+    "governed_by": "RBI",
+    "source_circular": "RBI KYC Master Direction"
+  },
+  {
+    "domain": "Products",
+    "category": "KYC/Identity",
+    "rule_name": "PEP Screening",
+    "current_value": "Mandatory screening against PEP lists for all customers",
+    "governed_by": "RBI",
+    "source_circular": "RBI KYC Master Direction"
+  },
+  {
+    "domain": "Products",
+    "category": "E-Mandate/Subscriptions",
+    "rule_name": "E-Mandate Registration",
+    "current_value": "Additional factor authentication required for registration. Auto-debit limit: INR 1 crore with AFA.",
+    "governed_by": "RBI",
+    "source_circular": "RBI Framework on e-Mandates (2019, updated)"
+  },
+  {
+    "domain": "Operations",
+    "category": "IFSC License",
+    "rule_name": "IFSCA License Conditions",
+    "current_value": "Licensed as Payment System Provider in GIFT IFSC. Must comply with IFSCA (Payment and Settlement Systems) Regulations, 2024.",
+    "governed_by": "IFSCA",
+    "source_circular": "IFSCA PSS Regulations 2024"
+  },
+  {
+    "domain": "Operations",
+    "category": "IFSC License",
+    "rule_name": "Capital Adequacy",
+    "current_value": "Minimum net worth as prescribed by IFSCA for PSP category",
+    "governed_by": "IFSCA",
+    "source_circular": "IFSCA PSS Regulations 2024"
+  },
+  {
+    "domain": "Operations",
+    "category": "Transaction Monitoring",
+    "rule_name": "STR Filing Threshold",
+    "current_value": "No fixed threshold — suspicious transaction reports must be filed based on risk indicators",
+    "governed_by": "FIU-IND",
+    "source_circular": "PMLA Rules, FIU-IND Guidelines"
+  },
+  {
+    "domain": "Operations",
+    "category": "Transaction Monitoring",
+    "rule_name": "CTR Filing",
+    "current_value": "Cash transactions above INR 10 lakh (single or aggregate in a month)",
+    "governed_by": "FIU-IND",
+    "source_circular": "PMLA Rules"
+  },
+  {
+    "domain": "Operations",
+    "category": "Transaction Monitoring",
+    "rule_name": "Cross-Border Wire Transfer Reporting",
+    "current_value": "All cross-border wire transfers above INR 5 lakh to be reported",
+    "governed_by": "FIU-IND/RBI",
+    "source_circular": "PMLA Rules, RBI Guidelines"
+  },
+  {
+    "domain": "Operations",
+    "category": "Correspondent Banking",
+    "rule_name": "Correspondent Bank Due Diligence",
+    "current_value": "Enhanced due diligence on correspondent banking relationships. Annual review mandatory.",
+    "governed_by": "RBI",
+    "source_circular": "RBI KYC Master Direction"
+  },
+  {
+    "domain": "Operations",
+    "category": "Data & Reporting",
+    "rule_name": "Data Localization",
+    "current_value": "Payment data to be stored only in India (for domestic transactions)",
+    "governed_by": "RBI",
+    "source_circular": "RBI Circular on Storage of Payment System Data (2018)"
+  },
+  {
+    "domain": "Operations",
+    "category": "Data & Reporting",
+    "rule_name": "FIU-IND Reporting",
+    "current_value": "Monthly CTR, STR within 7 days of suspicion, NTR as applicable",
+    "governed_by": "FIU-IND",
+    "source_circular": "PMLA Rules"
+  },
+  {
+    "domain": "Operations",
+    "category": "AML Screening",
+    "rule_name": "Sanctions Screening",
+    "current_value": "Real-time screening against UN, OFAC, EU, and India's UAPA lists for all transactions",
+    "governed_by": "RBI/IFSCA",
+    "source_circular": "RBI Master Direction on KYC, IFSCA AML Guidelines"
+  },
+  {
+    "domain": "Compliance",
+    "category": "AML/CFT Policy",
+    "rule_name": "AML/CFT Policy Review",
+    "current_value": "Annual review by Board of Directors. Policy must cover CDD, EDD, record keeping, STR procedures.",
+    "governed_by": "RBI/IFSCA",
+    "source_circular": "RBI KYC Master Direction, IFSCA AML Guidelines"
+  },
+  {
+    "domain": "Compliance",
+    "category": "AML/CFT Policy",
+    "rule_name": "ML/TF Risk Assessment",
+    "current_value": "Enterprise-wide risk assessment to be conducted annually. Must cover products, customers, geographies, delivery channels.",
+    "governed_by": "RBI/IFSCA",
+    "source_circular": "RBI KYC Master Direction, IFSCA AML Guidelines"
+  },
+  {
+    "domain": "Compliance",
+    "category": "Audit",
+    "rule_name": "Internal Audit Frequency",
+    "current_value": "Annual internal audit of AML/CFT compliance. Concurrent audit for high-risk areas.",
+    "governed_by": "RBI/IFSCA",
+    "source_circular": "RBI KYC Master Direction"
+  },
+  {
+    "domain": "Compliance",
+    "category": "Audit",
+    "rule_name": "Statutory Audit",
+    "current_value": "Annual statutory audit as per Companies Act and IFSCA requirements",
+    "governed_by": "IFSCA",
+    "source_circular": "Companies Act 2013, IFSCA Regulations"
+  },
+  {
+    "domain": "Compliance",
+    "category": "Board Governance",
+    "rule_name": "Board Reporting on AML",
+    "current_value": "Quarterly reporting to Board on AML/CFT compliance status, STRs filed, and risk assessment updates",
+    "governed_by": "RBI/IFSCA",
+    "source_circular": "RBI KYC Master Direction"
+  },
+  {
+    "domain": "Compliance",
+    "category": "Board Governance",
+    "rule_name": "Principal Officer Appointment",
+    "current_value": "Designated Principal Officer for PMLA compliance. Must be registered with FIU-IND.",
+    "governed_by": "FIU-IND",
+    "source_circular": "PMLA Rules"
+  },
+  {
+    "domain": "Compliance",
+    "category": "Record Keeping",
+    "rule_name": "Transaction Record Retention",
+    "current_value": "Minimum 5 years from date of transaction. 8 years for STR-related records.",
+    "governed_by": "RBI/PMLA",
+    "source_circular": "PMLA Section 12, RBI KYC Master Direction"
+  },
+  {
+    "domain": "Compliance",
+    "category": "Record Keeping",
+    "rule_name": "KYC Record Retention",
+    "current_value": "5 years after business relationship ends",
+    "governed_by": "RBI/PMLA",
+    "source_circular": "PMLA Rules, RBI KYC Master Direction"
+  },
+  {
+    "domain": "Compliance",
+    "category": "Training",
+    "rule_name": "AML/CFT Training",
+    "current_value": "Annual training for all staff. Enhanced training for front-line and compliance staff.",
+    "governed_by": "RBI/IFSCA",
+    "source_circular": "RBI KYC Master Direction, IFSCA AML Guidelines"
+  }
+]

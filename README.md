@@ -1,36 +1,177 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RegMonitor — AI-Powered Regulatory Monitoring Tool
 
-## Getting Started
+An intelligent compliance monitoring system built for Glomopay, an IFSC-licensed payment institution in GIFT City. The tool automatically fetches regulatory circulars from RBI, SEBI, and IFSCA, analyzes them using AI (MiniMax M2.7), and generates actionable compliance insights with citations.
 
-First, run the development server:
+## Architecture
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                  VERCEL (Next.js 15 App)                  │
+│  ├── Dashboard (feed with filters, Monday morning view)   │
+│  ├── Analysis Card (summary + score + actions + citations)│
+│  ├── Baseline Editor (view/edit regulatory reality)       │
+│  ├── PDF Upload (custom document ingestion)               │
+│  └── API Routes (CRUD, analysis trigger, review, fetch)   │
+└─────────────────────────┬────────────────────────────────┘
+                          │
+┌─────────────────────────▼────────────────────────────────┐
+│                  SUPABASE                                 │
+│  ├── circulars, analyses, action_items, citations         │
+│  ├── concept_mappings, baseline_rules, review_status      │
+│  ├── scraper_logs                                         │
+│  └── Storage: circular-pdfs/                              │
+└──────────────────────────────────────────────────────────┘
+```
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend + API | Next.js 15 (App Router) |
+| UI Components | shadcn/ui + Tailwind CSS v4 |
+| Database | Supabase (hosted PostgreSQL) |
+| PDF Storage | Supabase Storage |
+| LLM | MiniMax M2.7 via OpenAI SDK |
+| PDF Parsing | pdf-parse v2 |
+| RSS Parsing | rss-parser |
+| Web Scraping | cheerio |
+| Deployment | Vercel |
+
+## Features
+
+- **Auto-fetch** from 3 regulatory sources (RBI, SEBI, IFSCA)
+- **Custom PDF upload** with drag-and-drop
+- **AI analysis** with 5-step chain-of-thought reasoning
+- **Semantic relevance scoring** (LLM extraction + deterministic scoring)
+- **Glomopay baseline** — structured regulatory reality for accurate delta detection
+- **Action items** with team routing, deadlines, and priority
+- **Citations** — exact quoted text with section and page references
+- **Review flow** — mark reviewed, confirm baseline changes
+- **Baseline editor** — view and update regulatory rules by domain
+
+## Local Development
+
+### Prerequisites
+
+- Node.js 18+
+- A Supabase project
+- MiniMax API key
+
+### Setup
+
+1. **Clone and install:**
+
+```bash
+git clone <repo-url>
+cd AI-powered-regulatory-monitoring-tool
+npm install
+```
+
+2. **Set up Supabase:**
+
+   - Create a new Supabase project at [supabase.com](https://supabase.com)
+   - Run the SQL schema in `supabase/schema.sql` in the Supabase SQL Editor
+   - Copy your project URL, anon key, and service role key
+
+3. **Configure environment:**
+
+```bash
+cp .env.local.example .env.local
+```
+
+Edit `.env.local` with your keys:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+MINIMAX_API_KEY=your-minimax-api-key
+CRON_SECRET=any-random-string
+```
+
+4. **Seed the baseline:**
+
+   Visit `/baseline` in the app and click "Seed Baseline", or call:
+
+```bash
+curl -X POST http://localhost:3000/api/baseline/seed
+```
+
+5. **Run the dev server:**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── page.tsx                    # Dashboard
+│   ├── circular/[id]/page.tsx      # Analysis card detail
+│   ├── baseline/page.tsx           # Baseline viewer/editor
+│   ├── upload/page.tsx             # PDF upload
+│   └── api/
+│       ├── circulars/route.ts      # GET (list+filter)
+│       ├── circulars/[id]/route.ts # GET single circular
+│       ├── analyze/route.ts        # POST: trigger LLM analysis
+│       ├── upload/route.ts         # POST: PDF upload
+│       ├── baseline/route.ts       # GET, PUT
+│       ├── baseline/seed/route.ts  # POST: seed baseline
+│       ├── review/route.ts         # POST: mark reviewed
+│       ├── fetch/route.ts          # POST: trigger scrapers
+│       └── scraper-status/route.ts # GET: latest scraper logs
+├── lib/
+│   ├── supabase/
+│   │   ├── server.ts               # Server-side Supabase client
+│   │   └── client.ts               # Browser-side Supabase client
+│   ├── minimax.ts                  # MiniMax LLM client + JSON parser
+│   ├── scoring.ts                  # Deterministic relevance scoring
+│   ├── prompts.ts                  # LLM prompt templates
+│   ├── types.ts                    # TypeScript types
+│   ├── scrapers/
+│   │   ├── rbi.ts                  # RBI RSS scraper
+│   │   ├── sebi.ts                 # SEBI RSS scraper
+│   │   ├── ifsca.ts                # IFSCA HTML scraper
+│   │   ├── html-extractor.ts        # HTML text extraction
+│   │   └── pdf-extractor.ts        # PDF text extraction
+│   └── baseline/
+│       └── glomopay-baseline.json  # Static seed baseline (29 rules)
+└── components/
+    ├── Navbar.tsx
+    ├── CircularCard.tsx
+    ├── RelevanceBadge.tsx
+    ├── SourceBadge.tsx
+    ├── FilterBar.tsx
+    ├── FetchButton.tsx
+    └── ScraperStatus.tsx
+```
 
-## Learn More
+## How It Works
 
-To learn more about Next.js, take a look at the following resources:
+1. **Fetch**: Scrapers pull circulars from 3 regulatory websites (RSS + HTML scraping)
+2. **Extract**: PDFs are downloaded and text is extracted using pdf-parse
+3. **Analyze**: MiniMax M2.7 performs 5-step chain-of-thought analysis against the Glomopay baseline
+4. **Score**: Deterministic code (not LLM) computes relevance: HIGH / MEDIUM / LOW / NOT_RELEVANT
+5. **Display**: Dashboard shows circulars sorted by relevance with analysis cards
+6. **Review**: Compliance officer reviews, confirms baseline changes, adds notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Vercel
 
-## Deploy on Vercel
+1. Push to GitHub
+2. Import in Vercel
+3. Set environment variables in Vercel dashboard
+4. Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The `vercel.json` configures:
+- 60-second function timeout for LLM analysis
+- Daily cron job at 6 AM UTC to fetch new circulars
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Design Decisions
+
+See [PRODUCT_THINKING.md](./PRODUCT_THINKING.md) for the full product thinking document covering problem scoping, first principles analysis, feature prioritization, and architectural decisions.

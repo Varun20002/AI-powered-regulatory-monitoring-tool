@@ -1,0 +1,19 @@
+{
+  "functions": {
+    "src/app/api/analyze/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/fetch/route.ts": {
+      "maxDuration": 60
+    },
+    "src/app/api/upload/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/fetch",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}
