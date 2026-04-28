@@ -15,7 +15,6 @@ Built originally for an IFSC-licensed payment institution in GIFT City (Glomopay
 
 - [What you get](#what-you-get)
 - [Demo video](#demo-video)
-- [Screenshots](#screenshots)
 - [How it works](#how-it-works)
 - [Quick start (5 min)](#quick-start-5-min)
 - [Configuration](#configuration)
@@ -46,18 +45,6 @@ Built originally for an IFSC-licensed payment institution in GIFT City (Glomopay
 [![Watch the RegMonitor demo on YouTube](https://img.youtube.com/vi/lEjbVrRsUYQ/hqdefault.jpg)](https://youtu.be/lEjbVrRsUYQ)
 
 If the preview image does not render in your viewer, use the direct link: [https://youtu.be/lEjbVrRsUYQ](https://youtu.be/lEjbVrRsUYQ).
-
-## Screenshots
-
-| Dashboard | Analysis card |
-|---|---|
-| Feed of circulars sorted by relevance, filterable by source/date/score | Summary, what changed, why it matters, action items, citations |
-
-| Baseline editor | Paste circular |
-|---|---|
-| Edit your company's regulatory rules by domain | Paste raw circular text for one-off analysis |
-
-> Drop screenshots into [public/screenshots/](public/screenshots/) and link them here once you've taken them.
 
 ## How it works
 
